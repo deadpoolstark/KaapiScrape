@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaapi Ration</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .leaflet-container {
+      width: 75vw !important;
+      height: 600px;
+      margin: auto;
+    }
+    .leaflet-popup-content-wrapper {
+      max-width: 400px !important;
+      font-size: 16px;
+      line-height: 1.5;
+      background-color: #fdfaf6;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      color: #333;
+      font-family: sans-serif;
+    }
+    .popup-heading {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    .popup-owner {
+      font-size: 16px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .popup-section {
+      margin-bottom: 12px;
+    }
+    .yield-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .yield-table th, .yield-table td {
+      border: 1px solid #999;
+      padding: 4px 8px;
+      text-align: center;
+    }
+    .yield-table th {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Welcome to Kaapi Ration</h1>
+    <p>Scroll down to explore!</p>
+  </header>
+
+  <section class="map-section">
+    <div id="map"></div>
+  </section>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+  <script>
+    var map = L.map('map').setView([15.0, 77.0], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    const csvFile = 'data.csv';
+
+    const locations = [
+      { lat: 13.3389, lng: 75.7724, estate: 'Kumar Coffee Estate' },
+      { lat: 11.4133, lng: 76.7115, estate: 'Reddy Agro Farm' },
+      { lat: 15.3173, lng: 74.1232, estate: 'Dsouza Plantations' },
+      { lat: 25.4645, lng: 91.3662, estate: 'Das Valley Coffee' }
+    ];
+
+    let csvData = [];
+
+    Papa.parse(csvFile, {
+      download: true,
+      header: true,
+      complete: function(results) {
+        csvData = results.data;
+        addMarkers();
+      }
+    });
+
+    function addMarkers() {
+      locations.forEach(loc => {
+        const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+        marker.bindTooltip(loc.estate);
+
+        marker.on('click', () => {
+          const matchedData = csvData.find(row => row["Estate Name"] === loc.estate);
+          let popupContent = `<div class="popup-heading">${loc.estate}</div>`;
+          if (matchedData) {
+
+            // Owner Name
+            if (matchedData['Owner Name'] && matchedData['Owner Name'].trim() !== '') {
+              popupContent += `<div class="popup-owner">${matchedData['Owner Name']}</div>`;
+            }
+
+            // Coords & Elevation & Region
+            popupContent += `<div class="popup-section">`;
+            popupContent += `<strong>Latitude:</strong> ${loc.lat}<br/>`;
+            popupContent += `<strong>Longitude:</strong> ${loc.lng}<br/>`;
+            if (matchedData['Region'] && matchedData['Region'].trim() !== '') popupContent += `<strong>Region:</strong> ${matchedData['Region']}<br/>`;
+            if (matchedData['Elevation (m)'] && matchedData['Elevation (m)'].trim() !== '') popupContent += `<strong>Elevation:</strong> ${matchedData['Elevation (m)']} m`;
+            popupContent += `</div>`;
+
+            // Crop
+            popupContent += `<div class="popup-section">`;
+            if (matchedData['Crop Type'] && matchedData['Crop Type'].trim() !== '') popupContent += `<strong>Crop Type:</strong> ${matchedData['Crop Type']}<br/>`;
+            if (matchedData['Variety'] && matchedData['Variety'].trim() !== '') popupContent += `<strong>Variety:</strong> ${matchedData['Variety']}<br/>`;
+            if (matchedData['Organic?'] && matchedData['Organic?'].trim() !== '') popupContent += `<strong>Organic:</strong> ${matchedData['Organic?']}<br/>`;
+            if (matchedData['Yearly Yield (kg)'] && matchedData['Yearly Yield (kg)'].trim() !== '') popupContent += `<strong>Yearly Yield:</strong> ${matchedData['Yearly Yield (kg)']} kg`;
+            popupContent += `</div>`;
+
+            // Weather
+            popupContent += `<div class="popup-section">`;
+            if (matchedData['Humidity (%)'] && matchedData['Humidity (%)'].trim() !== '') popupContent += `<strong>Humidity:</strong> ${matchedData['Humidity (%)']}<br/>`;
+            if (matchedData['Rainfall (mm)'] && matchedData['Rainfall (mm)'].trim() !== '') popupContent += `<strong>Rainfall:</strong> ${matchedData['Rainfall (mm)']} mm<br/>`;
+            if (matchedData['Temperature (C)'] && matchedData['Temperature (C)'].trim() !== '') popupContent += `<strong>Temperature:</strong> ${matchedData['Temperature (C)']} °C`;
+            popupContent += `</div>`;
+
+            // Monthly Yield
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+            let hasYieldData = months.some(month => matchedData[`Yield - ${month}`] && matchedData[`Yield - ${month}`].trim() !== '');
+            if (hasYieldData) {
+              popupContent += `<div class="popup-section">
+                <strong>Monthly Yield:</strong>
+                <table class="yield-table">
+                  <tr><th>Month</th><th>Yield (kg)</th></tr>`;
+
+              months.forEach(month => {
+                const yieldKey = `Yield - ${month}`;
+                if (matchedData[yieldKey] && matchedData[yieldKey].trim() !== '') {
+                  popupContent += `<tr><td>${month}</td><td>${matchedData[yieldKey]}</td></tr>`;
+                }
+              });
+              popupContent += `</table></div>`;
+            }
+          } else {
+            popupContent += `<div>No data found.</div>`;
+          }
+
+          marker.bindPopup(popupContent).openPopup();
+        });
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f9f5f0;
+}
+header {
+  background: #4b2e2e;
+  color: white;
+  padding: 50px 20px;
+  text-align: center;
+}
+header h1 {
+  margin: 0;
+  font-size: 3em;
+}
+.map-section {
+  height: 100vh;
+}
+#map {
+  height: 100%;
+  width: 100%;
+}
+.leaflet-popup-content {
+  font-size: 0.9em;
+}

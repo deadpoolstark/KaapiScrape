@@ -1,0 +1,5 @@
+Farmer ID,Owner Name,Estate Name,Latitude,Longitude,Region,Elevation (m),Crop Type,Variety,Yearly Yield (kg),Organic?,Humidity (%),Rainfall (mm),Temperature (C),Yield - Jan,Yield - Feb,Yield - Mar,Yield - Apr,Yield - May,Yield - Jun,Yield - Jul
+1,Rajesh Kumar,Kumar Coffee Estate,13.3389,75.7724,"Chikmagalur, Karnataka",1100,Coffee,Arabica,1200,Yes,75%,300,22,20,22,25,28,32,34,38
+2,Asha Reddy,Reddy Agro Farm,11.4133,76.7115,"Coorg, Karnataka",950,Coffee,Robusta,1600,No,80%,250,24,30,32,34,36,38,42,44
+3,Manuel Dsouza,Dsouza Plantations,15.3173,74.1232,Goa Highlands,850,Coffee,Liberica,900,Yes,,,,,,,,,,
+4,Neha Das,Das Valley Coffee,25.4645,91.3662,Meghalaya,1200,Coffee,Arabica,1400,Yes,,,,,,,,,,
