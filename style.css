@@ -1,10 +1,10 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: #f9f5f0;
+  background: #DA9174;
 }
 header {
-  background: #4b2e2e;
+  background: #B34846;
   color: white;
   padding: 50px 20px;
   text-align: center;
@@ -22,4 +22,10 @@ header h1 {
 }
 .leaflet-popup-content {
   font-size: 0.9em;
+}
+@media (max-width: 768px) {
+  .leaflet-container {
+    width: 100vw !important;
+    height: 80vh !important;
+  }
 }

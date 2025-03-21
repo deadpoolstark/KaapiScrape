@@ -67,10 +67,40 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
   <script>
-    var map = L.map('map').setView([15.0, 77.0], 5);
+    var map = L.map('map', {
+      center: [22.3511, 78.6677], 
+      zoom: 5,
+      minZoom: 5,  // Restrict zooming out
+      maxZoom: 10, // Allow some zooming in
+      zoomControl: false // Removes the + and - buttons
+    });
+
+    // Restrict panning to India's bounding box
+    var bounds = [
+      [6.4627, 68.1097],  // Southwest (Kerala)
+      [35.5133, 97.3956]   // Northeast (Arunachal Pradesh)
+    ];
+    map.setMaxBounds(bounds);
+    map.on('drag', function () {
+      map.panInsideBounds(bounds, { animate: false });
+    });   
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    // Mask overlay to cover non-India regions
+    var mask = [
+      [[-90, -180], [-90, 180], [90, 180], [90, -180]],  // Entire world
+      [[6.4627, 68.1097], [6.4627, 97.3956], [35.5133, 97.3956], [35.5133, 68.1097]] // India's boundary (cutout)
+    ];
+
+    L.polygon(mask, {
+      color: "#DA9174",
+      weight: 1,
+      fillColor: "#DA9174",
+      fillOpacity: 1,
+      clickable: false
     }).addTo(map);
 
     const csvFile = 'data.csv';
